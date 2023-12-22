@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
+
+from django.utils import timezone
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django_celery_beat',
 
     'lil_bro',
     'users',
@@ -135,3 +140,20 @@ AUTH_USER_MODEL = 'users.User'
 os.environ['AWS_ACCESS_KEY_ID'] = os.getenv('AWS_ACCESS_KEY_ID')
 os.environ['AWS_SECRET_ACCESS_KEY'] = os.getenv('AWS_SECRET_ACCESS_KEY')
 key_arn = os.getenv('key_arn')
+
+# URL of the Redis message broker
+CELERY_BROKER_URL = 'redis://localhost:6379'
+
+# The URL of the results broker, also Redis
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+CELERY_TASK_TRACK_STARTED = os.getenv('CELERY_TASK_TRACK_STARTED') == 'True'
+
+# Periodic task for celery
+CELERY_BEAT_SCHEDULE = {
+    'delete_expired_secrets': {
+        'task': 'lil_bro.tasks.delete_expired_secrets',
+        'schedule': timedelta(minutes=1),
+        'start_time': timezone.now()
+    },
+}
