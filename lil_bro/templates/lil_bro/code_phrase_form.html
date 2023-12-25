@@ -1,15 +1,25 @@
 {% extends 'lil_bro/base.html' %}
-
 {% block title %}Create Secret{% endblock %}
-
 {% block content %}
-    <h2>Create Secret</h2>
-    {% if error %}
-        <p class="text-danger">{{ error }}</p>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+
+<div class="d-flex justify-content-center align-items-center">
+    <div class="col-5 m-5">
+        <div class="card">
+            <div class="card-header">
+                <h2>Enter code phrase</h2>
+                <div class="card-body">
+                    {% if error %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

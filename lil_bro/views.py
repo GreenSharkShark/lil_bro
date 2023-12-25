@@ -2,7 +2,7 @@ import secrets
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, DeleteView
 from lil_bro.services import Encryptor, sha256_hash, make_link
 from lil_bro.forms import SecretForm, CodePhraseForm
 from lil_bro.models import Secret
@@ -12,7 +12,6 @@ class SecretCreateView(CreateView):
     model = Secret
     form_class = SecretForm
     template_name = 'lil_bro/secret_create.html'
-    success_url = reverse_lazy('lil_bro:secret_create')
 
     def form_valid(self, form):
         secret = form.save()
@@ -25,14 +24,15 @@ class SecretCreateView(CreateView):
             secret.code_phrase = sha256_hash(secret.code_phrase)
             secret.is_code_phrase = True
         else:
+            # if the code phrase wasn't set by the user, we use a random string
             secret.code_phrase = secrets.token_hex(32)
 
         secret.link = make_link(secret.code_phrase)
-        secret.time_to_delete = timezone.now() + timezone.timedelta(minutes=secret.lifetime)
+        secret.time_to_delete = timezone.now() + timezone.timedelta(minutes=int(secret.lifetime))
 
         secret.save()
 
-        return super().form_valid(form)
+        return render(self.request, 'lil_bro/copy_link.html', {'link': secret.link, 'hash': secret.code_phrase})
 
 
 class SecretRetrieveView(DetailView):
@@ -67,3 +67,13 @@ class SecretRetrieveView(DetailView):
             return render(request, self.template_name, {'secret': secret_text})
         else:
             return render(request, 'lil_bro/code_phrase_form.html', {'form': form, 'error': 'Неверная кодовая фраза'})
+
+
+class SecretDeleteView(DeleteView):
+    model = Secret
+    template_name = 'lil_bro/secret_delete.html'
+    success_url = reverse_lazy('lil_bro:secret_create')
+
+    def get_object(self, queryset=None):
+        code_phrase = self.kwargs.get('code_phrase')
+        return get_object_or_404(Secret, code_phrase=code_phrase)
