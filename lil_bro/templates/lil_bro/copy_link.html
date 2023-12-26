@@ -1,19 +1,37 @@
 {% extends 'lil_bro/base.html' %}
 {% block title %}Create Secret{% endblock %}
 {% block content %}
-    <div class="d-flex justify-content-center align-items-center">
-        <div class="col-5 m-5">
-            <div class="card">
-                <div class="card-body">
-                    {{ link }}
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Copy link</button>
-                        <a href="{% url 'lil_bro:secret_create'%}" class="btn btn-primary">Home</a>
-                        <a href="{% url 'lil_bro:secret_delete' hash %}" class="btn btn-danger">Delete</a>
-
-                    </div>
-                </div>
+<div class="d-flex justify-content-center align-items-center">
+    <div class="col-5 m-5">
+        <div class="card">
+            <div class="card-body" id="linkContainer">
+                {{ link }}
+            </div>
+            <div class="card-footer">
+                <button id="copyButton" type="button" class="btn btn-primary" onclick="copyLink()">Copy link</button>
+                <a href="{% url 'lil_bro:secret_create'%}" class="btn btn-primary">Home</a>
+                <a href="{% url 'lil_bro:secret_delete' hash %}" class="btn btn-danger">Delete</a>
             </div>
         </div>
     </div>
+</div>
+
+<script>
+    function copyLink() {
+        var linkText = document.getElementById("linkContainer").innerText.trim();
+        var tempInput = document.createElement("input");
+        tempInput.value = linkText;
+        document.body.appendChild(tempInput);
+
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        // Изменение текста кнопки на "Copied"
+        var copyButton = document.getElementById("copyButton");
+        copyButton.innerText = "Copied";
+        copyButton.disabled = true; // Опционально, чтобы предотвратить повторное нажатие
+    }
+</script>
+
 {% endblock %}
