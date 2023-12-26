@@ -1,4 +1,5 @@
-from django.forms import ModelForm, Form, CharField, ChoiceField
+from django.forms import ModelForm, Form, CharField, ChoiceField, Textarea
+
 from lil_bro.models import Secret
 
 
@@ -27,3 +28,8 @@ class SecretForm(ModelForm):
 
 class CodePhraseForm(Form):
     code_phrase = CharField(label='Code Phrase', max_length=100)
+
+
+class ReportForm(Form):
+    topic = CharField(label='Topic', max_length=100)
+    report = CharField(label='Problem', widget=Textarea)

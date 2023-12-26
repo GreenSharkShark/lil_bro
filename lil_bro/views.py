@@ -1,11 +1,13 @@
 import secrets
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView, DeleteView
+from django.views import View
+from django.views.generic import CreateView, DetailView, DeleteView, TemplateView
 from lil_bro.services import Encryptor, sha256_hash, make_link
-from lil_bro.forms import SecretForm, CodePhraseForm
+from lil_bro.forms import SecretForm, CodePhraseForm, ReportForm
 from lil_bro.models import Secret
+from lil_bro.tasks import send_report
 
 
 class SecretCreateView(CreateView):
@@ -77,3 +79,25 @@ class SecretDeleteView(DeleteView):
     def get_object(self, queryset=None):
         code_phrase = self.kwargs.get('code_phrase')
         return get_object_or_404(Secret, code_phrase=code_phrase)
+
+
+class SendReportView(View):
+    template_name = 'lil_bro/send_report.html'
+
+    def get(self, request):
+        form = ReportForm
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            topic = form.cleaned_data.get('topic')
+            message = form.cleaned_data.get('report')
+            send_report.delay(topic=topic, message=message)
+            return redirect('lil_bro:secret_create')
+
+        return render(request, self.template_name, {'form': form})
+
+
+class HowItWorksTemplateView(TemplateView):
+    template_name = 'lil_bro/how_it_works.html'
