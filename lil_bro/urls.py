@@ -7,8 +7,8 @@ app_name = LilBroConfig.name
 
 urlpatterns = [
     path('', SecretCreateView.as_view(), name='secret_create'),
-    path('secret/<str:code_phrase>/', SecretRetrieveView.as_view(), name='secret_retrieve'),
-    path('secret/delete/<str:code_phrase>/', SecretDeleteView.as_view(), name='secret_delete'),
+    path('secret/<str:pk>/', SecretRetrieveView.as_view(), name='secret_retrieve'),
+    path('secret/delete/<str:pk>/', SecretDeleteView.as_view(), name='secret_delete'),
     path('send-report/', SendReportView.as_view(), name='send_report'),
     path('how-it-works/', HowItWorksTemplateView.as_view(), name='how_it_works'),
 ]

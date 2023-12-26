@@ -81,5 +81,5 @@ def sha256_hash(text):
     return hashed_text
 
 
-def make_link(hash: str) -> str:
-    return f"http://127.0.0.1:8000/secret/{hash}/"
+def make_link(uuid: str) -> str:
+    return f"http://127.0.0.1:8000/secret/{uuid}/"
