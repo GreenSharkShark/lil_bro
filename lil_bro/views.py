@@ -23,7 +23,6 @@ class SecretCreateView(CreateView):
         # hash the code phrase if it was set by the user
         if secret.code_phrase:
             secret.code_phrase = sha256_hash(secret.code_phrase)
-            secret.is_code_phrase = True
 
         secret.time_to_delete = timezone.now() + timezone.timedelta(minutes=int(secret.lifetime))
         secret.save()
