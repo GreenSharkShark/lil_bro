@@ -32,7 +32,7 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 CSRF_TRUSTED_ORIGINS = ['https://*.thelilbro.xyz']
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
+ALLOWED_HOSTS = [] if DEBUG else os.getenv('ALLOWED_HOSTS').split(' ')
 
 
 # Application definition
