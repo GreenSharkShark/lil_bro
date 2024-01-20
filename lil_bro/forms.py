@@ -4,7 +4,7 @@ from lil_bro.models import Secret
 
 
 class SecretForm(ModelForm):
-    """A form to creating Secret model's object"""
+    """A form to creating Secret model's object """
 
     LIFETIME_CHOICES = [
         (30, '30 minutes'),

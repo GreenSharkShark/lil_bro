@@ -1,5 +1,4 @@
 FROM nginx:latest
 
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/niginx/conf.d
-COPY proxy_params /etc/nginx
+COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d
+COPY ./docker/nginx/proxy_params /etc/nginx

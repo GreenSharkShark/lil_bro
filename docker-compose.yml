@@ -5,44 +5,42 @@ services:
     container_name: lil_bro_app
     build:
       context: .
-    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 config.wsgi:application"
+    command: |
+      bash -c "python manage.py collectstatic --noinput &&
+               python manage.py migrate &&
+               gunicorn -c config/gunicorn_config.py config.wsgi:application"
     tty: false
     volumes:
       - static_volume:/lil_bro/static
       - media_volume:/lil_bro/media
-      - .:/lil_bro
+      - etc-letsencrypt:/etc/letsencrypt:rw
+      - /lil_bro:/lil_bro
     restart: on-failure
-    ports:
-      - "8000:8000"
     env_file:
       - .env
     depends_on: [lil_bro_db, redis, celery, beat]
 
   lil_bro_db:
     container_name: lil_bro_db
-
     image: postgres:15.3-alpine
-
     environment:
-      POSTGRES_DB: ${db_name}
-      POSTGRES_USER: ${db_user}
-      POSTGRES_PASSWORD: ${db_pass}
-
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
-
     volumes:
-      - postgres_data_lil_bro:/var/lib/postgresql/data
+      - lil_bro_db:/var/lib/postgresql/data
 
   celery:
     container_name: celery-worker
-
     build:
       context: .
     restart: on-failure
+    depends_on: [redis]
     command: sh -c "celery -A config worker -l info -S django"
 
   beat:
@@ -50,6 +48,7 @@ services:
     build:
       context: .
     restart: on-failure
+    depends_on: [celery]
     command: sh -c "celery -A config beat -l info -S django"
 
   redis:
@@ -59,21 +58,23 @@ services:
 
   nginx:
     build:
-      dockerfile: ./Dockerfile
-      context: ./docker/nginx/
+      dockerfile: ./docker/nginx/Dockerfile
+      context: .
     container_name: lil_bro_nginx
-    image: lil_bro_nginx
     volumes:
-      - static_volume:/lil_bro/static
-      - media_volume:/lil_bro/media
-    depends_on: [ lil_bro_app]
+      - /lil_bro:/lil_bro
+      - static_volume:/lil_bro/static:ro
+      - media_volume:/lil_bro/media:ro
+      - etc-letsencrypt:/etc/letsencrypt:ro
+    depends_on: [lil_bro_app]
     ports:
       - "${NGINX_EXTERNAL_PORT}:80"
+      - "443:443"
+    restart: on-failure
 
 volumes:
+  etc-letsencrypt:
   static_volume:
   media_volume:
-  postgres_data_lil_bro:
-  lil_bro:
-  lil_bro_bd:
+  lil_bro_db:
     driver: local
