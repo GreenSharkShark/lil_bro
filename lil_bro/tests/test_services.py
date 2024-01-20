@@ -30,4 +30,4 @@ class TestLink(TestCase):
 
     def test_make_link(self):
         link = make_link(self.pk)
-        self.assertEqual(link, f"http://127.0.0.1:8000/secret/{self.pk}/")
+        self.assertEqual(link, f"https://thelilbro.xyz/secret/{self.pk}/")

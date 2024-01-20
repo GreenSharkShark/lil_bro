@@ -13,7 +13,6 @@ class Secret(models.Model):
     lifetime = models.PositiveSmallIntegerField(verbose_name='lifetime')
     time_to_delete = models.DateTimeField(verbose_name='time to delete', **NULLABLE)
 
-
     def __str__(self):
         return f'Secret {self.pk}'
 
