@@ -1,0 +1,57 @@
+name: Deploy Pipeline
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+    paths-ignore:
+      - '.github/workflows/*'
+      - 'README.md'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+
+    steps:
+      - name: Get repository code
+        uses: actions/checkout@v3
+
+      - name: Copy .env file to remote server
+        run: |
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "DEBUG=${{ secrets.DEBUG }}" >> .env
+          
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "key_arn=${{ secrets.key_arn }}" >> .env
+          
+          echo "CELERY_TASK_TRACK_STARTED=${{ secrets.CELERY_TASK_TRACK_STARTED }}" >> .env
+          
+          echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+          echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+          echo "EMAIL_ADMIN=${{ secrets.EMAIL_ADMIN }}" >> .env
+          
+          echo "NGINX_EXTERNAL_PORT=${{ secrets.NGINX_EXTERNAL_PORT }}" >> .env
+          
+          echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
+
+      - name: Set up SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SHH_KEY_TO_REMOTE_SERVER }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with rsync
+        run: rsync -avz --delete . root@${{ secrets.SSH_HOST }}:/lil_bro/
+
+      - name: Start building
+        run: ssh root@${{ secrets.SSH_HOST }} 'cd /lil_bro/ && docker-compose up -d --build'
