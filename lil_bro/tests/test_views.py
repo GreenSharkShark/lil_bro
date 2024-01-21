@@ -174,3 +174,15 @@ class HowItWorksTemplateViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertTemplateUsed(response, 'lil_bro/how_it_works.html')
+
+
+class SecretPlugTemplateViewTest(TestCase):
+    def setUp(self):
+        self.url = reverse('lil_bro:secret_plug', kwargs={'pk': '96030cea-1a0d-4ede-ba96-5b4c8f047074'})
+
+    def test_secret_plug_view_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'lil_bro/secret_plug.html')
+        self.assertIn('pk', response.context)
+        self.assertEqual(response.context['pk'], '96030cea-1a0d-4ede-ba96-5b4c8f047074')
