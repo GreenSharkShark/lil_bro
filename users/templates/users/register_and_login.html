@@ -9,19 +9,6 @@
             <div class="card w-100">
                 <div class="card-header text-center">
                     <a href="{% url 'lil_bro:how_it_works'%}" class="btn btn-light btn-sm">How it works and how to use the service</a>
-                    {% if user.is_authenticated %}
-                        <p class="mt-2">
-                            Hi, {{ user.username }}
-                            <a href="{% url 'users:logout' %}" class="btn btn-link btn-sm p-0">Logout</a>
-                        </p>
-                    {% else %}
-                        <p class="mt-2">
-                            To create a secret with unlimited lifetime, please 
-                            <a href="{% url 'users:register' %}" class="btn btn-link btn-sm p-0">register</a> 
-                            or 
-                            <a href="{% url 'users:login' %}" class="btn btn-link btn-sm p-0">login</a>.
-                        </p>
-                    {% endif %}
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-column justify-content-center align-items-center">
@@ -31,7 +18,8 @@
                                 {{ form|crispy }}
                             </div>
                             <div class="card-footer text-center">
-                                <button type="submit" class="btn btn-primary btn-sm mr-2">Create</button>
+                                <button type="submit" class="btn btn-primary btn-sm mr-2">Sign in</button>
+                                <a href="{% url 'lil_bro:secret_create'%}" class="btn btn-primary btn-sm">Home</a>
                                 <br class="d-md-none">
                                 <a href="{% url 'lil_bro:send_report'%}" class="btn btn-link btn-sm">Report a problem</a>
                             </div>
