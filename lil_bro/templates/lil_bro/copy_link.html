@@ -1,68 +1,31 @@
 {% extends 'lil_bro/base.html' %}
 {% block title %}Create Secret{% endblock %}
 {% block content %}
+{% load static %}
 <div class="container">
     <div class="row justify-content-center align-items-center">
         <div class="col-lg-5 col-md-8 col-sm-10 col-12 m-5">
             <div class="card">
                 <div class="card-body" id="linkContainer">
+                    {% if not link%}
+                    <p>Your secret was saved</p>
+                    {% else %}
                     {{ link }}
+                    {% endif %}
                 </div>
                 <div class="card-footer">
+                    {% if link%}
                     <button id="copyButton" type="button" class="btn btn-primary" onclick="copyLink()">Copy link</button>
-                    <a href="{% url 'lil_bro:secret_create'%}" class="btn btn-primary">Home</a>
                     <a href="{% url 'lil_bro:secret_delete' pk %}" class="btn btn-danger">Delete</a>
+                    {% endif %}
+                    <a href="{% url 'lil_bro:secret_create'%}" class="btn btn-primary">Home</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function copyLink() {
-        var linkText = document.getElementById("linkContainer").innerText.trim();
-        var tempInput = document.createElement("input");
-        tempInput.value = linkText;
-        document.body.appendChild(tempInput);
+<link rel="stylesheet" href="{% static 'CSS/main_style.css' %}">
+<script src="{% static 'JS/copy_link.js' %}"></script>
 
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-
-        // Изменение текста кнопки на "Copied"
-        var copyButton = document.getElementById("copyButton");
-        copyButton.innerText = "Copied";
-        copyButton.disabled = true; // Опционально, чтобы предотвратить повторное нажатие
-    }
-</script>
-
-<style>
-    .container {
-        min-height: 100vh;
-    }
-
-    .justify-content-center {
-        justify-content: center;
-    }
-
-    .align-items-center {
-        align-items: center;
-    }
-
-    .m-5 {
-        margin: 5px;
-    }
-
-    .col-lg-5 {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    @media (max-width: 576px) {
-        .col-lg-5 {
-            width: 100%;
-            max-width: 100%;
-        }
-    }
-</style>
 {% endblock %}

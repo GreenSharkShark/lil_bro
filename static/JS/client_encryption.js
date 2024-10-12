@@ -44,12 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const textField = form.querySelector('textarea[name="secret_text"]');
                 if (textField && textField.value) {
                     const key = await generateKey();
-                    const { ciphertext } = await encryptText(key, textField.value);
+                    const { ciphertext, iv } = await encryptText(key, textField.value);
 
                     if (ciphertext) {
                         const exportedKey = await window.crypto.subtle.exportKey('raw', key);
                         localStorage.setItem('encryptionKey', JSON.stringify(Array.from(new Uint8Array(exportedKey))));
-                        textField.value = toBase64(ciphertext);
+                        
+                        // Сохраняем IV и ciphertext в одном поле
+                        textField.value = `${toBase64(iv)}:${toBase64(ciphertext)}`;
                         form.submit();
                     }
                 }
