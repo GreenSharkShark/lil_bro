@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import CreateView, DetailView, DeleteView, TemplateView
+from django.views.generic import CreateView, DetailView, DeleteView, TemplateView, ListView
 from lil_bro.services import Encryptor, sha256_hash, make_link
 from lil_bro.forms import SecretForm, CodePhraseForm, ReportForm
 from lil_bro.models import Secret
@@ -23,7 +23,7 @@ class SecretCreateView(CreateView):
         secret = form.save()
 
         # encrypting the text
-        secret.secret_text = Encryptor().encrypt_text(secret.secret_text)
+        # secret.secret_text = Encryptor().encrypt_text(secret.secret_text)
         
         # hash the code phrase if it was set by the user
         if secret.code_phrase:
@@ -32,11 +32,22 @@ class SecretCreateView(CreateView):
         if secret.lifetime != '1':
             secret.time_to_delete = timezone.now() + timezone.timedelta(minutes=int(secret.lifetime))
             
+        if self.request.user.is_authenticated and secret.lifetime == '1':
+            secret.created_by = self.request.user
+            
         secret.save()
 
-        link = make_link(secret.id)
+        if secret.lifetime != '1':
+            link = make_link(secret.id)
+        else:
+            link = None
 
         return render(self.request, 'lil_bro/copy_link.html', {'link': link, 'pk': secret.pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['model_name'] = 'secret'
+        return context
 
 
 class SecretRetrieveView(DetailView):
@@ -53,7 +64,7 @@ class SecretRetrieveView(DetailView):
         else:
             secret_text = Encryptor().decrypt_text(secret.secret_text)
             secret.delete()
-            return render(request, self.template_name, {'secret': secret_text})
+            return render(request, self.template_name, {'secret': secret_text, 'model_name': 'secret_retrieve'})
 
     def post(self, request, *args, **kwargs):
         secret = self.get_object()
@@ -62,9 +73,27 @@ class SecretRetrieveView(DetailView):
         if form.is_valid() and sha256_hash(form.cleaned_data.get('code_phrase')) == secret.code_phrase:
             secret_text = Encryptor().decrypt_text(secret.secret_text)
             secret.delete()
-            return render(request, self.template_name, {'secret': secret_text})
+            return render(request, self.template_name, {'secret': secret_text, 'model_name': 'secret_retrieve'})
         else:
             return render(request, 'lil_bro/code_phrase_form.html', {'form': form, 'error': 'Неверная кодовая фраза'})
+        
+
+class SavedSecretsListView(ListView):
+    model = Secret
+    template_name = 'lil_bro/secret_retrieve.html'
+    
+    def get_queryset(self):
+        return Secret.objects.filter(created_by=self.request.user)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['model_name'] = 'secret_list'
+        encryptor = Encryptor()
+
+        # for secret in context['object_list']:
+        #     secret.secret_text = encryptor.decrypt_text(secret.secret_text)
+
+        return context
 
 
 class SecretDeleteView(DeleteView):

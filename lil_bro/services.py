@@ -85,5 +85,4 @@ def sha256_hash(text):
 def make_link(uuid: str) -> str:
     if not DEBUG:
         return f"https://thelilbro.xyz/secret/{uuid}/"
-    else:
-        return f"http://localhost:8000/secret/{uuid}/"
+    return f"http://localhost:8000/secret/{uuid}/"
