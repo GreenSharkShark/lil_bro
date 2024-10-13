@@ -4,15 +4,13 @@ services:
     build:
       context: .
     command: |
-      bash -c "python manage.py collectstatic --noinput &&
-               python manage.py migrate &&
-               gunicorn -c config/gunicorn_config.py config.wsgi:application"
+      bash -c "python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8000"
     tty: false
     volumes:
-      - static_volume:/lil_bro/static
-      - media_volume:/lil_bro/media
-      - etc-letsencrypt:/etc/letsencrypt:rw
       - .:/lil_bro
+    ports:
+      - 8000:8000
     restart: on-failure
     env_file:
       - .env
@@ -54,25 +52,6 @@ services:
     image: redis:6.0.16-alpine
     hostname: redis
 
-  nginx:
-    build:
-      dockerfile: ./docker/nginx/Dockerfile
-      context: .
-    container_name: lil_bro_nginx
-    volumes:
-      - /lil_bro:/lil_bro
-      - static_volume:/lil_bro/static:ro
-      - media_volume:/lil_bro/media:ro
-      - etc-letsencrypt:/etc/letsencrypt:ro
-    depends_on: [lil_bro_app]
-    ports:
-      - '${NGINX_EXTERNAL_PORT}:80'
-      - '443:443'
-    restart: on-failure
-
 volumes:
-  etc-letsencrypt:
-  static_volume:
-  media_volume:
   lil_bro_db:
     driver: local

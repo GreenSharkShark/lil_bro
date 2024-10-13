@@ -4,6 +4,7 @@ from aws_encryption_sdk import CommitmentPolicy
 from botocore.session import Session
 from config.settings import key_arn
 import hashlib
+from config.settings import DEBUG
 
 
 class Encryptor:
@@ -82,4 +83,6 @@ def sha256_hash(text):
 
 
 def make_link(uuid: str) -> str:
-    return f"https://thelilbro.xyz/secret/{uuid}/"
+    if not DEBUG:
+        return f"https://thelilbro.xyz/secret/{uuid}/"
+    return f"http://localhost:8000/secret/{uuid}/"

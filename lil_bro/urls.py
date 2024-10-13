@@ -1,7 +1,7 @@
 from lil_bro.apps import LilBroConfig
 from django.urls import path
 from lil_bro.views import SecretCreateView, SecretRetrieveView, SecretDeleteView, SendReportView, \
-    HowItWorksTemplateView, SecretPlugTemplateView
+    HowItWorksTemplateView, SecretPlugTemplateView, SavedSecretsListView
 
 app_name = LilBroConfig.name
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('secret/delete/<str:pk>/', SecretDeleteView.as_view(), name='secret_delete'),
     path('send-report/', SendReportView.as_view(), name='send_report'),
     path('how-it-works/', HowItWorksTemplateView.as_view(), name='how_it_works'),
+    path('show-saved/', SavedSecretsListView.as_view(), name='saved_secrets'),
 ]

@@ -1,5 +1,5 @@
 import uuid
-
+from config.settings import AUTH_USER_MODEL
 from django.db import models
 
 
@@ -12,6 +12,7 @@ class Secret(models.Model):
     secret_text = models.TextField(verbose_name='secret text')
     lifetime = models.PositiveSmallIntegerField(verbose_name='lifetime')
     time_to_delete = models.DateTimeField(verbose_name='time to delete', **NULLABLE)
+    created_by = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='secrets', verbose_name = 'created by', **NULLABLE)
 
     def __str__(self):
         return f'Secret {self.pk}'
