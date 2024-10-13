@@ -8,7 +8,7 @@ on:
     paths-ignore:
       - '.github/workflows/*'
       - 'README.md'
-
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
@@ -52,6 +52,3 @@ jobs:
 
       - name: Deploy with rsync
         run: rsync -avz --delete . root@${{ secrets.SSH_HOST }}:/lil_bro/
-
-      - name: Start building
-        run: ssh root@${{ secrets.SSH_HOST }} 'cd /lil_bro/ && docker-compose up -d --build'
