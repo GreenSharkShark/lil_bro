@@ -45,6 +45,7 @@ class SecretCreateView(CreateView):
         return render(self.request, 'lil_bro/copy_link.html', {'link': link, 'pk': secret.pk})
     
     def get_context_data(self, **kwargs):
+        """ Add model name to context to show different text in template """
         context = super().get_context_data(**kwargs)
         context['model_name'] = 'secret'
         return context
