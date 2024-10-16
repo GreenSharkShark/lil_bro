@@ -51,7 +51,7 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy with rsync
-        run: rsync -avz --delete . ubuntu@${{ secrets.SSH_HOST }}:/lil_bro/
+        run: rsync -avz --delete . ubuntu@${{ secrets.SSH_HOST }}:/home/ubuntu/lil_bro/
 
       - name: Start building
-        run: ssh ubuntu@${{ secrets.SSH_HOST }} 'cd /lil_bro/ && docker-compose up -d --build'
+        run: ssh ubuntu@${{ secrets.SSH_HOST }} 'cd /home/ubuntu/lil_bro/ && docker-compose up -d --build'

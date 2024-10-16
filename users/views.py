@@ -12,14 +12,14 @@ class UserRegisterView(CreateView):
     form_class = UserRegisterForm
     template_name = 'users/register_and_login.html'
     success_url = reverse_lazy('lil_bro:secret_create')
-    
+
     def form_valid(self, form) -> HttpResponse:
-        response =  super().form_valid(form)
+        response = super().form_valid(form)
         user = form.save()
         login(self.request, user)
         return response
-    
-    
+
+
 class UserLoginView(LoginView):
     template_name = 'users/register_and_login.html'
     redirect_authenticated_user = True
@@ -29,8 +29,8 @@ class UserLoginView(LoginView):
 class UserDeleteView(DeleteView):
     model = User
     template_name = 'lil_bro/secret_delete.html'
-    success_url = reverse_lazy('lil_bro:secret_create') 
-    
+    success_url = reverse_lazy('lil_bro:secret_create')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_name'] = 'user'
