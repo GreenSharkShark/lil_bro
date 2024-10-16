@@ -1,5 +1,6 @@
 from lil_bro.services import Encryptor, sha256_hash, make_link
 from unittest import TestCase
+from config.settings import DEBUG
 
 
 class TestEncryptor(TestCase):
@@ -30,4 +31,7 @@ class TestLink(TestCase):
 
     def test_make_link(self):
         link = make_link(self.pk)
-        self.assertEqual(link, f"https://thelilbro.xyz/secret/{self.pk}/")
+        if DEBUG:
+            self.assertEqual(link, f"http://localhost:8000/secret/{self.pk}/")
+        else:
+            self.assertEqual(link, f"https://thelilbro.xyz/secret/{self.pk}/")

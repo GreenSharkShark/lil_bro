@@ -23,7 +23,7 @@ class SecretCreateView(CreateView):
         secret = form.save()
 
         # encrypting the text
-        # secret.secret_text = Encryptor().encrypt_text(secret.secret_text)
+        secret.secret_text = Encryptor().encrypt_text(secret.secret_text)
         
         # hash the code phrase if it was set by the user
         if secret.code_phrase:
