@@ -3,14 +3,15 @@ services:
     container_name: lil_bro_app
     build:
       context: .
+      dockerfile: Dockerfile.prod
     command: |
       bash -c "python manage.py collectstatic --noinput &&
                python manage.py migrate &&
                gunicorn -c config/gunicorn_config.py config.wsgi:application"
     tty: false
     volumes:
-      - static_volume:/lil_bro/static
-      - media_volume:/lil_bro/media
+      - ./static:/lil_bro/static
+      - ./media:/lil_bro/media
       - etc-letsencrypt:/etc/letsencrypt:rw
       - .:/lil_bro
     restart: on-failure
@@ -53,6 +54,7 @@ services:
     container_name: redis
     image: redis:6.0.16-alpine
     hostname: redis
+    depends_on: [lil_bro_db]
 
   nginx:
     build:
@@ -60,9 +62,9 @@ services:
       context: .
     container_name: lil_bro_nginx
     volumes:
-      - /lil_bro:/lil_bro
-      - static_volume:/lil_bro/static:ro
-      - media_volume:/lil_bro/media:ro
+      - ./lil_bro:/lil_bro
+      - ./static:/lil_bro/static:ro
+      - ./media:/lil_bro/media:ro
       - etc-letsencrypt:/etc/letsencrypt:ro
     depends_on: [lil_bro_app]
     ports:
@@ -70,9 +72,17 @@ services:
       - '443:443'
     restart: on-failure
 
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    volumes:
+      - etc-letsencrypt:/etc/letsencrypt
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; certbot certonly --webroot --force-renewal --test-cert --email zhorikzeniuk@gmail.com -d thelilbro.xyz -w /var/www/certbot --agree-tos --non-interactive && while :; do certbot renew --quiet --test-cert; sleep 12h & wait $${!}; done;'"
+    depends_on: [nginx]
+
 volumes:
   etc-letsencrypt:
-  static_volume:
-  media_volume:
   lil_bro_db:
     driver: local
