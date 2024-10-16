@@ -21,15 +21,12 @@ class SecretForm(ModelForm):
     class Meta:
         model = Secret
         fields = ['secret_text', 'code_phrase', 'lifetime_select_field']
-        
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        
         if request and request.user.is_authenticated:
             self.fields['lifetime_select_field'].choices += [(1, 'Unlimited')]
-    
 
     def save(self, commit=True):
         instance = super().save(commit=False)
