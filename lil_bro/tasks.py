@@ -1,8 +1,9 @@
 from celery import shared_task
 from django.core.mail import send_mail
 from django.utils import timezone
-from config.settings import EMAIL_HOST_USER, EMAIL_ADMIN
+from config.settings import EMAIL_HOST_USER, EMAIL_ADMIN, BASE_DIR
 from .models import Secret
+import subprocess
 
 
 @shared_task
@@ -22,3 +23,4 @@ def send_report(topic: str, message: str):
         recipient_list=[EMAIL_ADMIN],
         fail_silently=False
     )
+
