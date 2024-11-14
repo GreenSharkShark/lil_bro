@@ -4,18 +4,19 @@ RUN pip install --upgrade pip setuptools
 
 RUN apt update
 
-RUN useradd -rms /bin/bash bro && chmod 777 /opt /run
+ARG UID=1000
 
-WORKDIR /lil_bro
+RUN useradd -u $UID -m -s /bin/bash ubuntu
 
-COPY --chown=bro:lil_bro req.txt /lil_bro/req.txt
+WORKDIR /home/ubuntu/lil_bro
+
+COPY --chown=ubuntu:ubuntu req.txt .
 
 RUN pip install -r req.txt
 
-RUN mkdir /lil_bro/static && mkdir /lil_bro/media && chown -R bro:bro /lil_bro && chmod 755 /lil_bro
+RUN mkdir static media && chown -R ubuntu:ubuntu /home/ubuntu/lil_bro && chmod -R 755 /home/ubuntu/lil_bro
 
-COPY --chown=bro:lil_bro . .
+COPY --chown=ubuntu:ubuntu . .
 
-USER bro
+USER ubuntu
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
